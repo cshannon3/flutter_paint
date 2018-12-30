@@ -31,6 +31,8 @@ class Home extends StatelessWidget {
   PaintArea paintArea;
   ShapeTemplatesList shapeTemplatesList;
 
+  final double pieceSize = 30.0;
+
   @override
   Widget build(BuildContext context) {
     paintController = PaintController();
@@ -50,6 +52,7 @@ class Home extends StatelessWidget {
       paintController: paintController,
     );
 
+    paintController.initGrid(MediaQuery.of(context).size, pieceSize);
     return Scaffold(
         appBar: AppBar(
             title: Text('Paint'),
@@ -58,8 +61,6 @@ class Home extends StatelessWidget {
                 child: colorList)),
         body: Stack(
           children: <Widget>[
-            //Paint Area
-            // Undo Buttom
             paintArea,
             strokeWidthSlider,
             shapeTemplatesList,

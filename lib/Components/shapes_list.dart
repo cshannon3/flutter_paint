@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_paint/paint_controller.dart';
 import 'package:flutter_paint/shared.dart';
 
+// TODO Shrink size to button when unexpanded
 class ShapeTemplatesList extends StatefulWidget {
   final PaintController paintController;
 
@@ -43,30 +44,30 @@ class _ShapeTemplatesListState extends State<ShapeTemplatesList>
     }).toList();
   }
 
-  Iterable<Widget> _buildShapes() {
-    return templateShapes.map((sh) {
-      sh.color = widget.paintController.currentColor;
-      int index = templateShapes.indexOf(sh);
+  Iterable<Widget> _buildShapes(Size screenSize) {
+    return templateShapes.map((_sh) {
+      _sh.color = widget.paintController.currentColor;
+      int index = templateShapes.indexOf(_sh);
       return AnimatedBuilder(
         animation: shapesSliderAnimation,
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
           child: //ShapeCentered(shape: sh)),
               Draggable(
-                  child: ShapeCentered(shape: sh),
+                  child: ShapeCentered(shape: _sh),
                   onDraggableCanceled: (velocity, offset) {
                     setState(() {
                       paintController.addNewShapeToCanvas(Shape(
-                        shapeType: sh.shapeType,
+                        shapeType: _sh.shapeType,
                         color: paintController.currentColor,
                         location: offset -
                             Offset(0.0, AppBar().preferredSize.height + 80.0),
-                        polygon: sh.polygon,
-                        circle: sh.circle,
+                        polygon: _sh.polygon,
+                        circle: _sh.circle,
                       ));
                     });
                   },
-                  feedback: ShapeCentered(shape: sh)),
+                  feedback: ShapeCentered(shape: _sh)),
         ),
         builder: (context, child) => new Transform.translate(
               offset: Offset(0.0, shapeAnimations[index].value),
@@ -80,7 +81,13 @@ class _ShapeTemplatesListState extends State<ShapeTemplatesList>
   Widget build(BuildContext context) {
     return FormattedWidget(
       alignment: Alignment.topRight,
-      size: Size(100.0, 400.0),
+      size: Size(
+          100.0,
+          shapesShown
+              ? 450.0
+              : shapesSliderAnimation.status == AnimationStatus.reverse
+                  ? 50 + 400.0 * (1 - shapesSliderAnimation.value)
+                  : 50.0),
       child: ListView(
         padding: EdgeInsets.symmetric(horizontal: 3.0),
         // crossAxisAlignment: CrossAxisAlignment.end,
@@ -92,7 +99,7 @@ class _ShapeTemplatesListState extends State<ShapeTemplatesList>
               child: FlatButton(
                 onPressed: () {
                   setState(() {
-                    shapesShown
+                    !shapesShown
                         ? shapesSliderAnimation.forward()
                         : shapesSliderAnimation.reverse();
                     shapesShown = !shapesShown;
@@ -100,7 +107,7 @@ class _ShapeTemplatesListState extends State<ShapeTemplatesList>
                 },
                 child: Text('SHAPES'),
               )),
-        ]..addAll(_buildShapes()),
+        ]..addAll(_buildShapes(MediaQuery.of(context).size)),
       ),
     );
   }

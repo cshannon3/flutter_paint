@@ -1,7 +1,6 @@
 import 'package:custom_utils/custom_utils.dart';
 import 'package:flutter/material.dart';
 
-
 List<Color> colorOptions = [
   Colors.red,
   Colors.blue,
@@ -11,25 +10,20 @@ List<Color> colorOptions = [
   Colors.black,
   Colors.amber,
 ];
-List<Shape> templateShapes = [
-Shape(
-shapeType: ShapeType.circle,
-circle: Circle(radius: 20.0),
-),
-Shape(
-shapeType: ShapeType.polygon,
-polygon: Polygon(sidelen: 50.0, sides: 3)),
-Shape(
-shapeType: ShapeType.polygon,
-polygon: Polygon(sidelen: 40.0, sides: 4)),
-Shape(
-shapeType: ShapeType.polygon,
-polygon: Polygon(sidelen: 30.0, sides: 5)),
-Shape(
-shapeType: ShapeType.polygon,
-polygon: Polygon(sidelen: 25.0, sides: 6)),
+final List<Shape> templateShapes = [
+  Shape(
+    shapeType: ShapeType.circle,
+    circle: Circle(radius: 20.0),
+  ),
+  Shape(
+      shapeType: ShapeType.polygon, polygon: Polygon(sidelen: 50.0, sides: 3)),
+  Shape(
+      shapeType: ShapeType.polygon, polygon: Polygon(sidelen: 40.0, sides: 4)),
+  Shape(
+      shapeType: ShapeType.polygon, polygon: Polygon(sidelen: 30.0, sides: 5)),
+  Shape(
+      shapeType: ShapeType.polygon, polygon: Polygon(sidelen: 25.0, sides: 6)),
 ];
-
 
 class FormattedWidget extends StatelessWidget {
   final Size size;

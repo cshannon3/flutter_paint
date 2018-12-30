@@ -1,8 +1,10 @@
 # flutter_paint
 
-A new Flutter application.
+### This is based off of the tensor flow tutorial, I took the basic sketcher idea
+### and added a bunch of features like colors, paint thickness, undo, shapes etc
 
-## Getting Started
+### The original is [flutter_sketcher_tutorial](https://github.com/tensor-programming/flutter_sketcher_tutorial)
+### Youtube Tutorial for this [Dart Flutter Program](https://youtu.be/G7ZmQEXqmGA). Their youtube channel [Youtube Channel](https://www.youtube.com/channel/UCYqCZOwHbnPwyjawKfE21wg)
 
-For help getting started with Flutter, view our online
-[documentation](https://flutter.io/).
+###Their blog at [tensor-programming.com](http://tensor-programming.com/).
+

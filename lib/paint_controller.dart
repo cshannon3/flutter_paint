@@ -4,15 +4,24 @@ import 'package:custom_utils/custom_utils.dart';
 // TODO Straight lines using custom utils classes
 
 class PaintController extends ChangeNotifier {
-  Color _currentColor = Colors.blue;
-  double _currentStrokeWidth = 4.0;
-  List<Shape> _shapes = [];
-  List<ColoredLine> _coloredLines = [];
+  //int rows;
+  //int columns;
+  //double spotSize;
+  Color _currentColor;
+  double _currentStrokeWidth;
+  List<Shape> _shapes;
+  List<ColoredLine> _coloredLines;
   //List<PaintLayer> _paintLayers =[];
-  bool _gridOn;
+  //bool _gridOn;
   int _activeShapeIndex;
   // Way for listeners to know which changes affect them
   UpdateStatus updateStatus = UpdateStatus.UpToDate;
+
+  double _piecesize, _verticalPadding, _horizontalPadding;
+  Size _screenSize;
+  int _rows, _columns;
+  bool _gridOn;
+  List<int> _gridLocations;
 
   /* TODO Grid System for location
    Not setup yet but this will make positions of shapes much more
@@ -25,25 +34,49 @@ class PaintController extends ChangeNotifier {
    these will be set by multiplying by -1 then subtracting 1 so they are all negative
    Shapes will always override lines for location
   */
-  List<int> gridPositions = List.filled(150, 0);
 
-  PaintController();
+  PaintController({
+    Color initialColor = Colors.blue,
+    double initialStrokeWidth = 4.0,
+  }) {
+    _currentColor = initialColor;
+    _currentStrokeWidth = initialStrokeWidth;
+    _shapes = [];
+    _coloredLines = [];
+  }
+
+  initGrid(Size screenSize, double pieceSize) {
+    _piecesize = pieceSize;
+    _screenSize = screenSize;
+    _rows = (screenSize.height / _piecesize).floor();
+    _columns = (screenSize.width / _piecesize).floor();
+    _horizontalPadding = (screenSize.width % _piecesize) / 2;
+    _verticalPadding = (screenSize.height % _piecesize) / 2;
+    _gridOn = true;
+    _gridLocations = List.filled(_columns * _rows, 0);
+    notifyListeners();
+  }
 
   updateMade({bool resetActiveShapeIndex = false}) {
     assert(updateStatus != UpdateStatus.UpToDate);
     if (resetActiveShapeIndex) _activeShapeIndex = null;
     updateStatus = UpdateStatus.UpToDate;
+    notifyListeners();
   }
 
   updateMadeAdded(bool shape, int paintLayerIndex) {
     assert(updateStatus != UpdateStatus.UpToDate);
     updateStatus = UpdateStatus.UpToDate;
+    notifyListeners();
   }
+
+  int get activeShapeIndex => _activeShapeIndex;
 
   Color get currentColor => _currentColor;
 
   set currentColor(Color newColor) {
     if (_currentColor != newColor) {
+      print("color change");
       _currentColor = newColor;
       updateStatus = UpdateStatus.ColorChange;
       notifyListeners();
@@ -76,7 +109,8 @@ class PaintController extends ChangeNotifier {
   List<Shape> get shapes => _shapes;
 
   Shape getShape(int index) {
-    assert(isIndexInList(index, _shapes.length));
+    print(index);
+    // assert(isIndexInList(index, _shapes.length));
     return _shapes[index];
   }
 
@@ -105,10 +139,17 @@ class PaintController extends ChangeNotifier {
       // that shape invisible until new location is set
 // This allows for a clean split between stateless and stateful apps
 */
-  activateShape(int shapeIndex) {
-    assert(isIndexInList(shapeIndex, _shapes.length));
+  Shape activateShape(int shapeIndex) {
+    // assert(isIndexInList(shapeIndex, _shapes.length));
     _activeShapeIndex = shapeIndex;
+    updateStatus = UpdateStatus.ActiveShape;
     notifyListeners();
+    return getActiveShape();
+  }
+
+  deactivateShape() {
+    assert(_activeShapeIndex != null);
+    updateStatus = UpdateStatus.ShapeChange;
   }
 
   Shape getActiveShape() {
@@ -139,10 +180,21 @@ class PaintController extends ChangeNotifier {
   addNewShapeToCanvas(Shape newShape) {
     //newShape.location = location;
     _shapes.add(newShape);
+    // set index of shape to grid location
+    print(getLocation(newShape.location));
+    _gridLocations[getLocation(newShape.location)] = _shapes.length - 1;
     // _activeShapeIndex = _shapes.length -1;
     updateStatus = UpdateStatus.ShapeAdded;
     // When listeners are notified, [PaintArea] will check length
     // with shapes length to see if it needs to add last shape
+    notifyListeners();
+  }
+
+  saveChangesToShape(Shape modifiedShape) {
+    assert(_activeShapeIndex != null);
+    _shapes[_activeShapeIndex] = modifiedShape;
+    updateStatus = UpdateStatus.ShapeChange;
+
     notifyListeners();
   }
 
@@ -180,6 +232,33 @@ class PaintController extends ChangeNotifier {
   ColoredLine createColoredLine() {
     return ColoredLine(
         points: [], strokeWidth: _currentStrokeWidth, color: _currentColor);
+  }
+
+  /*
+
+
+  LOCATION/ Grid
+
+  */
+
+  //TODO PARAM THIS
+  int getLocation(Offset location, {bool settingSpot = false}) {
+    if (_gridOn) {
+      int _piececolumn =
+          ((location.dx - _horizontalPadding / 2) / (_piecesize + 3.0)).floor();
+      print(_piececolumn);
+      int _piecerow =
+          ((location.dy - _verticalPadding / 2) / (_piecesize + 3.0)).floor();
+      print(_piecerow);
+      int _pieceSpot = ((_piecerow) * (_columns)) + _piececolumn;
+      print(_pieceSpot);
+      return _pieceSpot;
+    }
+    return null;
+  }
+
+  int isSpotFilled(Offset location) {
+    return _gridLocations[getLocation(location)];
   }
 
   //List<PaintLayer> getPaintLayers(){return _paintLayers;}

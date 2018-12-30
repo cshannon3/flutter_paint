@@ -21,7 +21,7 @@ class _ActivePaintAreaState extends State<ActivePaintArea> {
   PaintController paintController;
 
   ColoredLine _activeColoredLine;
-
+  Shape _selectedShape;
   int totalLen = 0;
 
   @override
@@ -32,7 +32,11 @@ class _ActivePaintAreaState extends State<ActivePaintArea> {
     paintController.addListener(() {
       if (paintController.updateStatus == UpdateStatus.ColorChange ||
           paintController.updateStatus == UpdateStatus.StrokeWidthChange) {
-        _activeColoredLine = paintController.createColoredLine();
+        setState(() {
+          _activeColoredLine = paintController.createColoredLine();
+        });
+      } else if (paintController.updateStatus == UpdateStatus.UpToDate) {
+        setState(() {});
       }
       /*switch (paintController.updateStatus) {
         case UpdateStatus.ColorChange:
@@ -65,36 +69,96 @@ class _ActivePaintAreaState extends State<ActivePaintArea> {
         painter: PaintLayer(_activeColoredLine),
       ),
     );
-    return GestureDetector(
-      onTapDown: (details) {
-        setState(() {});
-        print("Tap down");
-      },
-      onPanStart: (DragStartDetails details) {
-        if (_activeColoredLine.points != null) _activeColoredLine.points = [];
-      },
-      onPanUpdate: (DragUpdateDetails details) {
-        setState(() {
-          RenderBox box = context.findRenderObject();
-          Offset point = box.globalToLocal(details.globalPosition);
+    return Stack(
+      children: <Widget>[
+        GestureDetector(
+          onTapDown: (details) {
+            RenderBox box = context.findRenderObject();
+            Offset point = box.globalToLocal(details.globalPosition);
+            if (paintController.isSpotFilled(point) != 0) {
+              setState(() {
+                if (_selectedShape == null) {
+                  //_selectedShape = paintController
+                  _selectedShape = paintController
+                      .activateShape(paintController.isSpotFilled(point));
+                } else {
+                  paintController.saveChangesToShape(_selectedShape);
+                  _selectedShape = null;
+                }
+              });
+              // Want a stopwatch to test if long press or pan.. could add long press
+              // but don't want to inhibit pan if it is painting instead of selecting
+              // an item
+              print("Tap down");
+            }
+          },
+          onPanStart: (DragStartDetails details) {
+            // TODO if shape is selected move shape instead of create line
+            if (_activeColoredLine.points != null)
+              _activeColoredLine.points = [];
+          },
+          onPanUpdate: (DragUpdateDetails details) {
+            setState(() {
+              RenderBox box = context.findRenderObject();
+              Offset point = box.globalToLocal(details.globalPosition);
 
-          _activeColoredLine.addPt(point);
-        });
-      },
-      onPanEnd: (DragEndDetails details) {
-        // print(totalLen);
-        // W/ PaintLayer2 Og settings 1349 ponits before red
-        // W/ all being rendered every frame 857 points
-        // W/ PaintLayer2 should repaint = true ~ 1200 points
-        //  W/ PaintLayer2 should repaint true, and this using PaintLayer2, and isComplex: true,
-        //        willChange: true, ~ 1300
-        //  W/ PaintLayer2 should repaint true, and this using PaintLayer2, and  no extra settings ~ 1300
-        // TODO conclusion on how to improve layeres
-        _activeColoredLine.points.add(null);
-        List<Offset> _pts = _activeColoredLine.points;
-        paintController.addNewColoredLine(_pts);
-      },
-      child: sketchArea,
+              _activeColoredLine.addPt(point);
+            });
+          },
+          onPanEnd: (DragEndDetails details) {
+            // print(totalLen);
+            // W/ PaintLayer2 Og settings 1349 ponits before red
+            // W/ all being rendered every frame 857 points
+            // W/ PaintLayer2 should repaint = true ~ 1200 points
+            //  W/ PaintLayer2 should repaint true, and this using PaintLayer2, and isComplex: true,
+            //        willChange: true, ~ 1300
+            //  W/ PaintLayer2 should repaint true, and this using PaintLayer2, and  no extra settings ~ 1300
+            // TODO conclusion on how to improve layeres
+            _activeColoredLine.points.add(null);
+            List<Offset> _pts = _activeColoredLine.points;
+            paintController.addNewColoredLine(_pts);
+          },
+          child: sketchArea,
+        ),
+        _selectedShape == null
+            ? SizedBox()
+            : ShapeCentered(
+                shape: _selectedShape,
+              ),
+        _selectedShape == null
+            ? SizedBox()
+            : CenterAbout(
+                // TODO account for items location -- if at bottom put above ect
+                position: _selectedShape.location + Offset(-50.0, 50.0),
+                child: Container(
+                    height: 50.0,
+                    width: 100.0,
+                    color: Colors.green,
+                    child: _selectedShape.shapeType == ShapeType.circle
+                        ? Slider(
+                            value: _selectedShape.circle.radius,
+                            max: 100.0,
+                            min: 5.0,
+                            divisions: 19,
+                            onChanged: (newVal) {
+                              _selectedShape = Shape.fromOld(_selectedShape,
+                                  newCircle: Circle(radius: newVal));
+                              setState(() {});
+                            })
+                        : Slider(
+                            value: _selectedShape.polygon.sidelen,
+                            max: 100.0,
+                            min: 5.0,
+                            divisions: 19,
+                            onChanged: (newVal) {
+                              _selectedShape = Shape.fromOld(_selectedShape,
+                                  newPolygon: Polygon(
+                                      sidelen: newVal,
+                                      sides: _selectedShape.polygon.sides));
+                              setState(() {});
+                            })),
+              )
+      ],
     );
   }
 }
