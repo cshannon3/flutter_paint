@@ -25,7 +25,9 @@ class UndoButtonBar extends StatelessWidget {
           tooltip: 'clear Screen',
           backgroundColor: Colors.grey,
           child: Icon(Icons.undo),
-          onPressed: () {},
+          onPressed: () {
+            paintController.clearAll();
+          },
         ),
       ]),
     );

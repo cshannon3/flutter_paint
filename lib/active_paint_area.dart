@@ -30,13 +30,28 @@ class _ActivePaintAreaState extends State<ActivePaintArea> {
     paintController = widget.paintController;
     _activeColoredLine = paintController.createColoredLine();
     paintController.addListener(() {
-      if (paintController.updateStatus == UpdateStatus.ColorChange ||
-          paintController.updateStatus == UpdateStatus.StrokeWidthChange) {
-        setState(() {
-          _activeColoredLine = paintController.createColoredLine();
-        });
-      } else if (paintController.updateStatus == UpdateStatus.UpToDate) {
-        setState(() {});
+      switch (paintController.updateStatus) {
+        case UpdateStatus.ColorChange:
+          setState(() {
+            _activeColoredLine = paintController.createColoredLine();
+          });
+          break;
+        case UpdateStatus.StrokeWidthChange:
+          setState(() {
+            _activeColoredLine = paintController.createColoredLine();
+          });
+
+          break;
+        case UpdateStatus.ClearAll:
+          setState(() {
+            _activeColoredLine = paintController.createColoredLine();
+          });
+          break;
+        case UpdateStatus.UpToDate:
+          setState(() {});
+          break;
+        default:
+          break;
       }
       /*switch (paintController.updateStatus) {
         case UpdateStatus.ColorChange:

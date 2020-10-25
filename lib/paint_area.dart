@@ -2,6 +2,7 @@ import 'package:custom_utils/custom_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_paint/Components/paint_layer.dart';
 import 'package:flutter_paint/Components/shapes_list.dart';
+import 'package:flutter_paint/CustomShapes/polygon_ring.dart';
 import 'package:flutter_paint/Debug/locations_grid.dart';
 import 'package:flutter_paint/active_paint_area.dart';
 import 'package:flutter_paint/paint_controller.dart';
@@ -61,8 +62,9 @@ class _PaintAreaState extends State<PaintArea> {
           break;
 
         case UpdateStatus.ShapeAdded:
-          paintLayers
-              .add(ShapeCentered(shape: paintController.getNewestShape()));
+          paintLayers.add(ShapeCentered(
+            shape: paintController.getNewestShape(),
+          ));
           final int len = -paintController.shapes.length;
           paintLayerOrder.add(len);
           paintController.updateMade(resetActiveShapeIndex: true);
@@ -110,10 +112,10 @@ class _PaintAreaState extends State<PaintArea> {
       size: MediaQuery.of(context).size,
       child: Stack(
         children: [
-          LocationsGridDebug(
-            boardsize: MediaQuery.of(context).size,
-            piecesize: 40.0,
-          ),
+          //LocationsGridDebug(
+          //  boardsize: MediaQuery.of(context).size,
+          //  piecesize: 40.0,
+          // ),
         ]
           ..addAll(paintLayers)
           ..add(activePaintArea),

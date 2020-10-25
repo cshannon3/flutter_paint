@@ -246,10 +246,8 @@ class PaintController extends ChangeNotifier {
     if (_gridOn) {
       int _piececolumn =
           ((location.dx - _horizontalPadding / 2) / (_piecesize + 3.0)).floor();
-      print(_piececolumn);
       int _piecerow =
           ((location.dy - _verticalPadding / 2) / (_piecesize + 3.0)).floor();
-      print(_piecerow);
       int _pieceSpot = ((_piecerow) * (_columns)) + _piececolumn;
       print(_pieceSpot);
       return _pieceSpot;
@@ -262,6 +260,14 @@ class PaintController extends ChangeNotifier {
   }
 
   //List<PaintLayer> getPaintLayers(){return _paintLayers;}
+
+  clearAll() {
+    updateStatus = UpdateStatus.ClearAll;
+    _activeShapeIndex = null;
+    _shapes.clear();
+    _coloredLines.clear();
+    notifyListeners();
+  }
 }
 
 enum UpdateStatus {

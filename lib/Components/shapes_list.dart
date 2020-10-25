@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_paint/paint_controller.dart';
 import 'package:flutter_paint/shared.dart';
 
-// TODO Shrink size to button when unexpanded
 class ShapeTemplatesList extends StatefulWidget {
   final PaintController paintController;
 
@@ -54,20 +53,25 @@ class _ShapeTemplatesListState extends State<ShapeTemplatesList>
           padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
           child: //ShapeCentered(shape: sh)),
               Draggable(
-                  child: ShapeCentered(shape: _sh),
-                  onDraggableCanceled: (velocity, offset) {
-                    setState(() {
-                      paintController.addNewShapeToCanvas(Shape(
-                        shapeType: _sh.shapeType,
-                        color: paintController.currentColor,
-                        location: offset -
-                            Offset(0.0, AppBar().preferredSize.height + 80.0),
-                        polygon: _sh.polygon,
-                        circle: _sh.circle,
-                      ));
-                    });
-                  },
-                  feedback: ShapeCentered(shape: _sh)),
+            child: ShapeCentered(
+              shape: _sh,
+            ),
+            onDraggableCanceled: (velocity, offset) {
+              setState(() {
+                paintController.addNewShapeToCanvas(Shape(
+                  shapeType: _sh.shapeType,
+                  color: paintController.currentColor,
+                  location: offset -
+                      Offset(0.0, AppBar().preferredSize.height + 80.0),
+                  polygon: _sh.polygon,
+                  circle: _sh.circle,
+                ));
+              });
+            },
+            feedback: ShapeCentered(
+              shape: _sh,
+            ),
+          ),
         ),
         builder: (context, child) => new Transform.translate(
               offset: Offset(0.0, shapeAnimations[index].value),
